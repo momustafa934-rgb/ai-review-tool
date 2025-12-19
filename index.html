@@ -1,242 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>AI Review Reply Assistant</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>AI Review Reply Generator</title>
   <style>
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#f7f7f8;color:#111}
-    .page{max-width:860px;margin:50px auto;padding:0 18px}
-    .card{background:#fff;border-radius:14px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
-    h1{margin:0 0 6px;font-size:28px}
-    .sub{margin:0 0 18px;color:#555;line-height:1.5}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .pill{background:#f1f1f3;border-radius:10px;padding:12px 14px;margin:14px 0}
-    label{font-size:13px;font-weight:600;display:block;margin:12px 0 6px}
-    input,textarea{width:100%;border:1px solid #ccc;border-radius:10px;padding:12px;font-size:14px;font-family:inherit}
-    textarea{min-height:130px;resize:vertical}
-    .btn{border:none;border-radius:10px;padding:12px 14px;font-size:14px;cursor:pointer}
-    .btn.primary{background:#4f46e5;color:#fff}
-    .btn.primary:hover{background:#4338ca}
-    .btn.dark{background:#111;color:#fff;text-decoration:none;display:inline-block;text-align:center}
-    .btn.dark:hover{background:#000}
-    .btn.ghost{background:#f1f1f3;color:#111}
-    .btn.ghost:hover{background:#e9e9ee}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .note{font-size:12px;color:#666;margin-top:10px}
-    .grid{margin-top:18px;display:grid;gap:12px}
-    .reviewCard{background:#fff;border-radius:12px;padding:16px;border:1px solid #eee}
-    .reviewText{white-space:pre-wrap;line-height:1.5;font-size:14px;margin:0 0 10px}
-    .actions{display:flex;gap:10px;flex-wrap:wrap}
-    .reply{margin-top:12px;background:#f1f1f3;border-radius:10px;padding:12px;white-space:pre-wrap;line-height:1.5;font-size:14px;min-height:44px}
-    .small{font-size:12px;color:#666}
-    .statusBar{margin-top:12px;font-size:13px;color:#333}
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 40px;
+    }
+    .box {
+      background: white;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      border-radius: 8px;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 15px;
+      cursor: pointer;
+    }
+    .reply {
+      margin-top: 15px;
+      white-space: pre-wrap;
+      background: #eee;
+      padding: 10px;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div class="card">
-      <h1>AI Review Reply Assistant</h1>
-      <p class="sub">Paste multiple reviews, generate replies (one click), then copy and post on Google.</p>
-
-      <div class="pill">
-        <div class="row" style="justify-content:space-between;">
-          <div>
-            <div style="font-weight:700;font-size:18px">£35 <span class="small">/ month</span></div>
-            <div class="small">Secure payments by Stripe • Cancel anytime</div>
-          </div>
-          <a class="btn dark" href="https://buy.stripe.com/00w28t7PK1Pn07EdEB7Zu01" target="_blank" rel="noopener">
-            Subscribe
-          </a>
-        </div>
-      </div>
-
-      <label>Email used for subscription</label>
-      <input id="email" type="email" placeholder="you@business.com" />
-
-      <label>Paste reviews (separate with a blank line)</label>
-      <textarea id="reviewsInput" placeholder="Review 1...
-
-Review 2...
-
-Review 3..."></textarea>
-
-      <div class="row" style="margin-top:12px">
-        <button id="loadBtn" class="btn ghost" onclick="loadReviews()">Load reviews</button>
-        <button id="genAllBtn" class="btn primary" onclick="generateAll()" disabled>Generate ALL replies</button>
-        <button class="btn ghost" onclick="clearAll()">Clear</button>
-      </div>
-
-      <div id="status" class="statusBar"></div>
-      <div class="note">Tip: paste 5–20 reviews. “Generate ALL replies” runs safely one-by-one.</div>
-
-      <div id="reviewsGrid" class="grid"></div>
-    </div>
+  <div class="box">
+    <h2>AI Review Reply Generator</h2>
+    <textarea id="review" placeholder="Paste customer review here..."></textarea>
+    <br>
+    <button onclick="generate()">Generate Reply</button>
+    <div class="reply" id="reply"></div>
   </div>
 
   <script>
-    let CURRENT_REVIEWS = [];
+    async function generate() {
+      const review = document.getElementById("review").value;
+      document.getElementById("reply").innerText = "Generating...";
 
-    function splitReviews(text) {
-      const parts = text.split(/\n\s*\n/g);
-      return parts.map(s => s.trim()).filter(s => s.length > 0);
-    }
-
-    function escapeHtml(str) {
-      return str.replace(/[&<>"']/g, m => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-      }[m]));
-    }
-
-    function setStatus(msg) {
-      document.getElementById("status").innerText = msg || "";
-    }
-
-    function loadReviews() {
-      const input = document.getElementById("reviewsInput").value;
-      const reviews = splitReviews(input);
-      CURRENT_REVIEWS = reviews;
-
-      const grid = document.getElementById("reviewsGrid");
-      grid.innerHTML = "";
-      setStatus("");
-
-      const genAllBtn = document.getElementById("genAllBtn");
-      genAllBtn.disabled = (reviews.length === 0);
-
-      if (reviews.length === 0) {
-        grid.innerHTML = `<div class="small">No reviews found. Paste reviews separated by a blank line.</div>`;
-        return;
-      }
-
-      reviews.forEach((text, idx) => {
-        const id = "r" + idx;
-        grid.innerHTML += `
-          <div class="reviewCard">
-            <div class="small">Review #${idx + 1}</div>
-            <p class="reviewText" id="${id}-text">${escapeHtml(text)}</p>
-            <div class="actions">
-              <button class="btn primary" onclick="generateReply(${idx})">Generate reply</button>
-              <button class="btn ghost" onclick="copyReply(${idx})">Copy reply</button>
-            </div>
-            <div class="reply" id="${id}-reply"></div>
-          </div>
-        `;
+      const res = await fetch("/generate-reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ review_text: review })
       });
 
-      setStatus(`${reviews.length} reviews loaded. You can generate one-by-one or click “Generate ALL replies”.`);
-    }
-
-    function setButtonsDisabled(disabled) {
-      document.getElementById("loadBtn").disabled = disabled;
-      document.getElementById("genAllBtn").disabled = disabled || (CURRENT_REVIEWS.length === 0);
-    }
-
-    async function generateReply(idx) {
-      const email = document.getElementById("email").value.trim();
-      const reviewEl = document.getElementById("r" + idx + "-text");
-      const replyEl = document.getElementById("r" + idx + "-reply");
-
-      if (!email) {
-        replyEl.innerText = "Enter the email you used to subscribe.";
-        return;
-      }
-
-      const review_text = reviewEl.innerText.trim();
-      replyEl.innerText = "Generating reply...";
-
-      try {
-        const res = await fetch("/generate-reply", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, review_text })
-        });
-
-        const data = await res.json();
-        replyEl.innerText = data.reply_text || "No reply returned.";
-      } catch (e) {
-        replyEl.innerText = "Error generating reply. Try again.";
-      }
-    }
-
-    async function generateAll() {
-      const email = document.getElementById("email").value.trim();
-      if (!email) {
-        setStatus("Enter the email you used to subscribe first.");
-        return;
-      }
-      if (CURRENT_REVIEWS.length === 0) {
-        setStatus("Paste and load reviews first.");
-        return;
-      }
-
-      setButtonsDisabled(true);
-
-      const total = CURRENT_REVIEWS.length;
-      let done = 0;
-
-      setStatus(`Generating replies... 0/${total}`);
-
-      for (let i = 0; i < total; i++) {
-        const replyEl = document.getElementById("r" + i + "-reply");
-        if (!replyEl) continue;
-
-        // Skip if already generated
-        const existing = replyEl.innerText.trim();
-        if (existing && existing !== "Generating reply..." && !existing.startsWith("Enter the email") && !existing.startsWith("Error")) {
-          done++;
-          setStatus(`Generating replies... ${done}/${total} (skipped already done)`);
-          continue;
-        }
-
-        replyEl.innerText = "Generating reply...";
-
-        try {
-          const reviewEl = document.getElementById("r" + i + "-text");
-          const review_text = (reviewEl ? reviewEl.innerText : CURRENT_REVIEWS[i]).trim();
-
-          const res = await fetch("/generate-reply", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, review_text })
-          });
-
-          const data = await res.json();
-          replyEl.innerText = data.reply_text || "No reply returned.";
-        } catch (e) {
-          replyEl.innerText = "Error generating reply. Try again.";
-        }
-
-        done++;
-        setStatus(`Generating replies... ${done}/${total}`);
-
-        // Small delay so you don’t spam the API
-        await new Promise(r => setTimeout(r, 350));
-      }
-
-      setButtonsDisabled(false);
-      setStatus(`Done ✅ Generated ${done}/${total} replies.`);
-    }
-
-    async function copyReply(idx) {
-      const replyEl = document.getElementById("r" + idx + "-reply");
-      const text = replyEl.innerText.trim();
-      if (!text) return;
-
-      try {
-        await navigator.clipboard.writeText(text);
-        setStatus(`Copied reply for Review #${idx + 1} ✅`);
-      } catch (e) {
-        setStatus(`Copy failed — select and copy manually (Review #${idx + 1}).`);
-      }
-    }
-
-    function clearAll() {
-      document.getElementById("reviewsInput").value = "";
-      document.getElementById("reviewsGrid").innerHTML = "";
-      CURRENT_REVIEWS = [];
-      document.getElementById("genAllBtn").disabled = true;
-      setStatus("");
+      const data = await res.json();
+      document.getElementById("reply").innerText = data.reply_text;
     }
   </script>
 </body>
