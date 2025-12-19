@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AI Review Reply Tool</title>
+  <title>AI Review Reply Generator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -10,7 +10,6 @@
       margin: 0;
       padding: 0;
     }
-
     .container {
       max-width: 600px;
       margin: 60px auto;
@@ -19,12 +18,10 @@
       border-radius: 10px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
-
     h2 {
-      margin-top: 0;
       text-align: center;
+      margin-top: 0;
     }
-
     textarea {
       width: 100%;
       height: 120px;
@@ -34,7 +31,6 @@
       border: 1px solid #ccc;
       resize: vertical;
     }
-
     button {
       width: 100%;
       margin-top: 15px;
@@ -46,23 +42,20 @@
       border-radius: 6px;
       cursor: pointer;
     }
-
     button:hover {
       background: #5a23d8;
     }
-
     .reply-box {
       margin-top: 20px;
       padding: 15px;
       background: #f0f0f0;
       border-radius: 6px;
-      white-space: pre-wrap;   /* THIS FIXES THE STRETCHING */
+      white-space: pre-wrap;
       word-wrap: break-word;
       font-size: 14px;
       line-height: 1.5;
       min-height: 60px;
     }
-
     .label {
       margin-top: 20px;
       font-weight: bold;
@@ -90,7 +83,7 @@
       output.innerText = "Generating reply...";
 
       try {
-        const res = await fetch("http://127.0.0.1:8000/generate-reply", {
+        const res = await fetch("https://YOUR_RENDER_URL.onrender.com/generate-reply", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -103,7 +96,7 @@
         const data = await res.json();
         output.innerText = data.reply_text;
       } catch (e) {
-        output.innerText = "Error generating reply. Make sure the server is running.";
+        output.innerText = "Error. Make sure the server is running.";
       }
     }
   </script>
