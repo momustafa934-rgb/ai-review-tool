@@ -1,144 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>AI Review Reply Generator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 0;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: 60px auto;
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      text-align: center;
-      margin-top: 0;
-    }
-
-    textarea {
-      width: 100%;
-      height: 120px;
-      padding: 12px;
-      font-size: 14px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      resize: vertical;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 15px;
-      padding: 12px;
-      font-size: 16px;
-      background: #6f2cff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #5a23d8;
-    }
-
-    .subscribe-btn {
-      background: #000;
-      margin-bottom: 10px;
-    }
-
-    .reply-box {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f0f0f0;
-      border-radius: 6px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      font-size: 14px;
-      line-height: 1.5;
-      min-height: 60px;
-    }
-
-    .label {
-      margin-top: 20px;
-      font-weight: bold;
-    }
-
-    .error {
-      color: red;
-      margin-top: 10px;
-      text-align: center;
-    }
-  </style>
+  <title>AI Review Reply Tool</title>
 </head>
 <body>
 
-  <div class="container">
-    <h2>AI Review Reply Generator</h2>
+<h2>AI Review Reply Generator</h2>
+<p><b>£35/month</b></p>
 
-    <a href="https://buy.stripe.com/00w28t7PK1Pn07EdEB7Zu01" target="_blank">
-      <button class="subscribe-btn">Subscribe (£35/month)</button>
-    </a>
+<a href="https://buy.stripe.com/00w28t7PK1Pn07EdEB7Zu01" target="_blank">
+  <button>Subscribe (£35/month)</button>
+</a>
 
-    <label style="display:block; margin-bottom:10px;">
-      <input type="checkbox" id="paidCheck">
-      I have subscribed
-    </label>
+<br><br>
 
-    <textarea id="review" placeholder="Paste the customer review here..."></textarea>
+<input id="email" placeholder="Email used for payment">
+<br><br>
 
-    <button onclick="generate()">Generate Reply</button>
+<textarea id="review" placeholder="Paste customer review here"></textarea>
+<br><br>
 
-    <div id="error" class="error"></div>
+<button onclick="generate()">Generate Reply</button>
 
-    <div class="label">Generated Reply:</div>
-    <div id="output" class="reply-box"></div>
-  </div>
+<p id="output"></p>
 
-  <script>
-    async function generate() {
-      const review = document.getElementById("review").value;
-      const output = document.getElementById("output");
-      const error = document.getElementById("error");
-      const paid = document.getElementById("paidCheck").checked;
+<script>
+async function generate() {
+  const email = document.getElementById("email").value;
+  const review = document.getElementById("review").value;
 
-      error.innerText = "";
-      output.innerText = "";
+  const res = await fetch("/generate-reply", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: email,
+      review_text: review
+    })
+  });
 
-      if (!paid) {
-        error.innerText = "You must subscribe before using the generator.";
-        return;
-      }
-
-      output.innerText = "Generating reply...";
-
-      try {
-        const res = await fetch("/generate-reply", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            review_text: review,
-            business_name: "Costa Coffee",
-            tone: "polite and professional"
-          })
-        });
-
-        const data = await res.json();
-        output.innerText = data.reply_text;
-      } catch (e) {
-        output.innerText = "Error. Please try again.";
-      }
-    }
-  </script>
+  const data = await res.json();
+  document.getElementById("output").innerText = data.reply_text;
+}
+</script>
 
 </body>
 </html>
