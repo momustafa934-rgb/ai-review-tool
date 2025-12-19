@@ -10,6 +10,7 @@
       margin: 0;
       padding: 0;
     }
+
     .container {
       max-width: 600px;
       margin: 60px auto;
@@ -18,10 +19,12 @@
       border-radius: 10px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
+
     h2 {
       text-align: center;
       margin-top: 0;
     }
+
     textarea {
       width: 100%;
       height: 120px;
@@ -31,6 +34,7 @@
       border: 1px solid #ccc;
       resize: vertical;
     }
+
     button {
       width: 100%;
       margin-top: 15px;
@@ -42,9 +46,16 @@
       border-radius: 6px;
       cursor: pointer;
     }
+
     button:hover {
       background: #5a23d8;
     }
+
+    .subscribe-btn {
+      background: #000;
+      margin-bottom: 15px;
+    }
+
     .reply-box {
       margin-top: 20px;
       padding: 15px;
@@ -56,6 +67,7 @@
       line-height: 1.5;
       min-height: 60px;
     }
+
     .label {
       margin-top: 20px;
       font-weight: bold;
@@ -66,6 +78,10 @@
 
   <div class="container">
     <h2>AI Review Reply Generator</h2>
+
+    <a href="https://buy.stripe.com/00w28t7PK1Pn07EdEB7Zu01" target="_blank">
+      <button class="subscribe-btn">Subscribe (£5/month)</button>
+    </a>
 
     <textarea id="review" placeholder="Paste the customer review here..."></textarea>
 
@@ -103,4 +119,3 @@
 
 </body>
 </html>
-
