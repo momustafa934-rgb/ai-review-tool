@@ -53,7 +53,7 @@
 
     .subscribe-btn {
       background: #000;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
 
     .reply-box {
@@ -72,6 +72,12 @@
       margin-top: 20px;
       font-weight: bold;
     }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -80,12 +86,19 @@
     <h2>AI Review Reply Generator</h2>
 
     <a href="https://buy.stripe.com/00w28t7PK1Pn07EdEB7Zu01" target="_blank">
-      <button class="subscribe-btn">Subscribe (£5/month)</button>
+      <button class="subscribe-btn">Subscribe (£35/month)</button>
     </a>
+
+    <label style="display:block; margin-bottom:10px;">
+      <input type="checkbox" id="paidCheck">
+      I have subscribed
+    </label>
 
     <textarea id="review" placeholder="Paste the customer review here..."></textarea>
 
     <button onclick="generate()">Generate Reply</button>
+
+    <div id="error" class="error"></div>
 
     <div class="label">Generated Reply:</div>
     <div id="output" class="reply-box"></div>
@@ -95,6 +108,16 @@
     async function generate() {
       const review = document.getElementById("review").value;
       const output = document.getElementById("output");
+      const error = document.getElementById("error");
+      const paid = document.getElementById("paidCheck").checked;
+
+      error.innerText = "";
+      output.innerText = "";
+
+      if (!paid) {
+        error.innerText = "You must subscribe before using the generator.";
+        return;
+      }
 
       output.innerText = "Generating reply...";
 
