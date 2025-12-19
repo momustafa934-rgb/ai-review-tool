@@ -1,47 +1,192 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>AI Review Reply Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: #f7f7f8;
+      color: #111;
+    }
+
+    .page {
+      max-width: 720px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 32px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      color: #555;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .price-box {
+      background: #f1f1f3;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .price {
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .price small {
+      font-weight: 400;
+      color: #555;
+    }
+
+    .subscribe-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .subscribe-btn:hover {
+      background: #000;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 18px;
+      font-family: inherit;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .generate-btn {
+      width: 100%;
+      padding: 14px;
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .generate-btn:hover {
+      background: #4338ca;
+    }
+
+    .output {
+      margin-top: 22px;
+      background: #f1f1f3;
+      padding: 16px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+    }
+  </style>
 </head>
+
 <body>
 
-<h2>AI Review Reply Generator</h2>
-<p><b>£35/month</b></p>
+  <div class="page">
+    <div class="card">
+      <h1>AI Review Reply Tool</h1>
+      <p class="subtitle">
+        Generate professional, polite replies to customer reviews in seconds.
+        Designed for small businesses that want to save time and stay consistent.
+      </p>
 
-<a href="https://buy.stripe.com/00w28t7PK1Pn07EdEB7Zu01" target="_blank">
-  <button>Subscribe (£35/month)</button>
-</a>
+      <div class="price-box">
+        <div class="price">£35 <small>/ month</small></div>
+      </div>
 
-<br><br>
+      <a class="subscribe-btn" href="https://buy.stripe.com/00w28t7PK1Pn07EdEB7Zu01" target="_blank">
+        Subscribe & Get Access
+      </a>
 
-<input id="email" placeholder="Email used for payment">
-<br><br>
+      <label>Email used for subscription</label>
+      <input id="email" type="email" placeholder="you@business.com">
 
-<textarea id="review" placeholder="Paste customer review here"></textarea>
-<br><br>
+      <label>Customer review</label>
+      <textarea id="review" placeholder="Paste the customer review here..."></textarea>
 
-<button onclick="generate()">Generate Reply</button>
+      <button class="generate-btn" onclick="generate()">
+        Generate Reply
+      </button>
 
-<p id="output"></p>
+      <div id="output" class="output"></div>
 
-<script>
-async function generate() {
-  const email = document.getElementById("email").value;
-  const review = document.getElementById("review").value;
+      <div class="footer-note">
+        Secure payments handled by Stripe • Cancel anytime
+      </div>
+    </div>
+  </div>
 
-  const res = await fetch("/generate-reply", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email: email,
-      review_text: review
-    })
-  });
+  <script>
+    async function generate() {
+      const email = document.getElementById("email").value;
+      const review = document.getElementById("review").value;
+      const output = document.getElementById("output");
 
-  const data = await res.json();
-  document.getElementById("output").innerText = data.reply_text;
-}
-</script>
+      output.innerText = "Generating reply...";
+
+      const res = await fetch("/generate-reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email,
+          review_text: review
+        })
+      });
+
+      const data = await res.json();
+      output.innerText = data.reply_text;
+    }
+  </script>
 
 </body>
 </html>
