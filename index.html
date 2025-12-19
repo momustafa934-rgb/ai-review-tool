@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Review Reply Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 60px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 12px;
+      font-size: 16px;
+      background: #6f2cff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #5a23d8;
+    }
+
+    .reply-box {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f0f0f0;
+      border-radius: 6px;
+      white-space: pre-wrap;   /* THIS FIXES THE STRETCHING */
+      word-wrap: break-word;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 60px;
+    }
+
+    .label {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>AI Review Reply Generator</h2>
+
+    <textarea id="review" placeholder="Paste the customer review here..."></textarea>
+
+    <button onclick="generate()">Generate Reply</button>
+
+    <div class="label">Generated Reply:</div>
+    <div id="output" class="reply-box"></div>
+  </div>
+
+  <script>
+    async function generate() {
+      const review = document.getElementById("review").value;
+      const output = document.getElementById("output");
+
+      output.innerText = "Generating reply...";
+
+      try {
+        const res = await fetch("http://127.0.0.1:8000/generate-reply", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            review_text: review,
+            business_name: "Costa Coffee",
+            tone: "polite and professional"
+          })
+        });
+
+        const data = await res.json();
+        output.innerText = data.reply_text;
+      } catch (e) {
+        output.innerText = "Error generating reply. Make sure the server is running.";
+      }
+    }
+  </script>
+
+</body>
+</html>
+
