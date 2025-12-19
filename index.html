@@ -1,192 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>AI Review Reply Tool</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta charset="UTF-8" />
+  <title>AI Review Reply Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: #f7f7f8;
-      color: #111;
-    }
-
-    .page {
-      max-width: 720px;
-      margin: 60px auto;
-      padding: 0 20px;
-    }
-
-    .card {
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 32px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-    }
-
-    h1 {
-      margin: 0 0 8px 0;
-      font-size: 28px;
-      font-weight: 600;
-    }
-
-    .subtitle {
-      color: #555;
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-
-    .price-box {
-      background: #f1f1f3;
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 24px;
-    }
-
-    .price {
-      font-size: 22px;
-      font-weight: 600;
-    }
-
-    .price small {
-      font-weight: 400;
-      color: #555;
-    }
-
-    .subscribe-btn {
-      display: block;
-      width: 100%;
-      padding: 14px;
-      background: #111;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      text-decoration: none;
-      text-align: center;
-      margin-bottom: 28px;
-    }
-
-    .subscribe-btn:hover {
-      background: #000;
-    }
-
-    label {
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 6px;
-      display: block;
-    }
-
-    input, textarea {
-      width: 100%;
-      padding: 12px;
-      font-size: 14px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 18px;
-      font-family: inherit;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 120px;
-    }
-
-    .generate-btn {
-      width: 100%;
-      padding: 14px;
-      background: #4f46e5;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .generate-btn:hover {
-      background: #4338ca;
-    }
-
-    .output {
-      margin-top: 22px;
-      background: #f1f1f3;
-      padding: 16px;
-      border-radius: 10px;
-      white-space: pre-wrap;
-      line-height: 1.5;
-      font-size: 14px;
-    }
-
-    .footer-note {
-      margin-top: 18px;
-      font-size: 13px;
-      color: #666;
-      text-align: center;
-    }
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#f7f7f8;color:#111}
+    .page{max-width:860px;margin:50px auto;padding:0 18px}
+    .card{background:#fff;border-radius:14px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+    h1{margin:0 0 6px;font-size:28px}
+    .sub{margin:0 0 18px;color:#555;line-height:1.5}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .pill{background:#f1f1f3;border-radius:10px;padding:12px 14px;margin:14px 0}
+    label{font-size:13px;font-weight:600;display:block;margin:12px 0 6px}
+    input,textarea{width:100%;border:1px solid #ccc;border-radius:10px;padding:12px;font-size:14px;font-family:inherit}
+    textarea{min-height:130px;resize:vertical}
+    .btn{border:none;border-radius:10px;padding:12px 14px;font-size:14px;cursor:pointer}
+    .btn.primary{background:#4f46e5;color:#fff}
+    .btn.primary:hover{background:#4338ca}
+    .btn.dark{background:#111;color:#fff;text-decoration:none;display:inline-block;text-align:center}
+    .btn.dark:hover{background:#000}
+    .btn.ghost{background:#f1f1f3;color:#111}
+    .btn.ghost:hover{background:#e9e9ee}
+    .note{font-size:12px;color:#666;margin-top:10px}
+    .grid{margin-top:18px;display:grid;gap:12px}
+    .reviewCard{background:#fff;border-radius:12px;padding:16px;border:1px solid #eee}
+    .reviewText{white-space:pre-wrap;line-height:1.5;font-size:14px;margin:0 0 10px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .reply{margin-top:12px;background:#f1f1f3;border-radius:10px;padding:12px;white-space:pre-wrap;line-height:1.5;font-size:14px;min-height:44px}
+    .small{font-size:12px;color:#666}
   </style>
 </head>
-
 <body>
-
   <div class="page">
     <div class="card">
-      <h1>AI Review Reply Tool</h1>
-      <p class="subtitle">
-        Generate professional, polite replies to customer reviews in seconds.
-        Designed for small businesses that want to save time and stay consistent.
-      </p>
+      <h1>AI Review Reply Assistant</h1>
+      <p class="sub">Paste multiple reviews, generate replies one by one, then copy and post on Google.</p>
 
-      <div class="price-box">
-        <div class="price">£35 <small>/ month</small></div>
+      <div class="pill">
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:700;font-size:18px">£35 <span class="small">/ month</span></div>
+            <div class="small">Secure payments by Stripe • Cancel anytime</div>
+          </div>
+          <a class="btn dark" href="https://buy.stripe.com/00w28t7PK1Pn07EdEB7Zu01" target="_blank" rel="noopener">Subscribe</a>
+        </div>
       </div>
-
-      <a class="subscribe-btn" href="https://buy.stripe.com/00w28t7PK1Pn07EdEB7Zu01" target="_blank">
-        Subscribe & Get Access
-      </a>
 
       <label>Email used for subscription</label>
-      <input id="email" type="email" placeholder="you@business.com">
+      <input id="email" type="email" placeholder="you@business.com" />
 
-      <label>Customer review</label>
-      <textarea id="review" placeholder="Paste the customer review here..."></textarea>
+      <label>Paste reviews (one per line OR separate with a blank line)</label>
+      <textarea id="reviewsInput" placeholder="Review 1...
 
-      <button class="generate-btn" onclick="generate()">
-        Generate Reply
-      </button>
+Review 2...
 
-      <div id="output" class="output"></div>
+Review 3..."></textarea>
 
-      <div class="footer-note">
-        Secure payments handled by Stripe • Cancel anytime
+      <div class="row" style="margin-top:12px">
+        <button class="btn primary" onclick="loadReviews()">Load reviews</button>
+        <button class="btn ghost" onclick="clearAll()">Clear</button>
       </div>
+
+      <div class="note">Tip: paste 5–20 reviews at once. Each review will get its own Generate + Copy buttons.</div>
+
+      <div id="reviewsGrid" class="grid"></div>
     </div>
   </div>
 
   <script>
-    async function generate() {
-      const email = document.getElementById("email").value;
-      const review = document.getElementById("review").value;
-      const output = document.getElementById("output");
+    function splitReviews(text) {
+      // Split by blank line OR single line if no blank lines
+      const hasBlankLines = text.includes("\n\n");
+      const parts = hasBlankLines
+        ? text.split(/\n\s*\n/g)
+        : text.split(/\n/g);
 
-      output.innerText = "Generating reply...";
+      return parts
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+    }
 
-      const res = await fetch("/generate-reply", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email,
-          review_text: review
-        })
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+
+    function loadReviews() {
+      const input = document.getElementById("reviewsInput").value;
+      const reviews = splitReviews(input);
+      const grid = document.getElementById("reviewsGrid");
+      grid.innerHTML = "";
+
+      if (reviews.length === 0) {
+        grid.innerHTML = `<div class="small">No reviews found. Paste some reviews first.</div>`;
+        return;
+      }
+
+      reviews.forEach((text, idx) => {
+        const id = "r" + idx;
+        grid.innerHTML += `
+          <div class="reviewCard">
+            <div class="small">Review #${idx + 1}</div>
+            <p class="reviewText" id="${id}-text">${escapeHtml(text)}</p>
+            <div class="actions">
+              <button class="btn primary" onclick="generateReply(${idx})">Generate reply</button>
+              <button class="btn ghost" onclick="copyReply(${idx})">Copy reply</button>
+            </div>
+            <div class="reply" id="${id}-reply"></div>
+          </div>
+        `;
       });
+    }
 
-      const data = await res.json();
-      output.innerText = data.reply_text;
+    async function generateReply(idx) {
+      const email = document.getElementById("email").value.trim();
+      const reviewEl = document.getElementById("r" + idx + "-text");
+      const replyEl = document.getElementById("r" + idx + "-reply");
+
+      if (!email) {
+        replyEl.innerText = "Enter the email you used to subscribe.";
+        return;
+      }
+
+      const review_text = reviewEl.innerText.trim();
+      replyEl.innerText = "Generating reply...";
+
+      try {
+        const res = await fetch("/generate-reply", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, review_text })
+        });
+
+        const data = await res.json();
+        replyEl.innerText = data.reply_text || "No reply returned.";
+      } catch (e) {
+        replyEl.innerText = "Error generating reply. Try again.";
+      }
+    }
+
+    async function copyReply(idx) {
+      const replyEl = document.getElementById("r" + idx + "-reply");
+      const text = replyEl.innerText.trim();
+      if (!text) return;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        replyEl.innerText = text + "\n\n(Copied ✅)";
+      } catch (e) {
+        replyEl.innerText = text + "\n\n(Copy failed — select and copy manually)";
+      }
+    }
+
+    function clearAll() {
+      document.getElementById("reviewsInput").value = "";
+      document.getElementById("reviewsGrid").innerHTML = "";
     }
   </script>
-
 </body>
 </html>
