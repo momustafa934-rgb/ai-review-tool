@@ -8,7 +8,6 @@ from email.message import EmailMessage
 
 app = FastAPI()
 
-# ENV VARS (set in Render)
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -16,6 +15,9 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 IMAP_HOST = "imap.gmail.com"
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 587
+
+# prevents re-processing the same emails (works while server stays up)
+PROCESSED_MESSAGE_IDS = set()
 
 
 def generate_reply(review_text: str) -> str:
@@ -34,8 +36,7 @@ def generate_reply(review_text: str) -> str:
         },
         timeout=20,
     )
-    data = r.json()
-    return data["choices"][0]["message"]["content"].strip()
+    return r.json()["choices"][0]["message"]["content"].strip()
 
 
 def send_email(to_email: str, reply_text: str):
@@ -51,41 +52,71 @@ def send_email(to_email: str, reply_text: str):
         server.send_message(msg)
 
 
+def extract_text(msg_obj) -> str:
+    body = ""
+    if msg_obj.is_multipart():
+        for part in msg_obj.walk():
+            if part.get_content_type() == "text/plain":
+                body = part.get_payload(decode=True).decode(errors="ignore")
+                break
+    else:
+        body = msg_obj.get_payload(decode=True).decode(errors="ignore")
+    return body.strip()
+
+
 @app.get("/process-emails")
 def process_emails():
     processed = 0
+    checked = 0
 
     with IMAPClient(IMAP_HOST) as server:
         server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-        server.select_folder("INBOX")
-        messages = server.search(["UNSEEN"])
 
-        for uid in messages:
-            raw = server.fetch(uid, ["RFC822"])[uid][b"RFC822"]
-            msg = email.message_from_bytes(raw)
+        # Check INBOX first
+        for folder in ["INBOX", "[Gmail]/All Mail"]:
+            try:
+                server.select_folder(folder)
+            except Exception:
+                continue
 
-            from_email = email.utils.parseaddr(msg.get("From"))[1]
+            uids = server.search(["ALL"])
+            if not uids:
+                continue
 
-            body = ""
-            if msg.is_multipart():
-                for part in msg.walk():
-                    if part.get_content_type() == "text/plain":
-                        body = part.get_payload(decode=True).decode(errors="ignore")
-                        break
-            else:
-                body = msg.get_payload(decode=True).decode(errors="ignore")
+            # only look at the most recent 10 emails
+            recent = uids[-10:]
 
-            if body.strip():
-                reply = generate_reply(body)
+            for uid in recent:
+                checked += 1
+                raw = server.fetch(uid, ["RFC822"])[uid][b"RFC822"]
+                msg = email.message_from_bytes(raw)
+
+                msg_id = msg.get("Message-ID", str(uid))
+                if msg_id in PROCESSED_MESSAGE_IDS:
+                    continue
+
+                from_email = email.utils.parseaddr(msg.get("From"))[1]
+                text = extract_text(msg)
+
+                if not from_email or not text:
+                    PROCESSED_MESSAGE_IDS.add(msg_id)
+                    continue
+
+                reply = generate_reply(text)
                 send_email(from_email, reply)
+
+                PROCESSED_MESSAGE_IDS.add(msg_id)
                 processed += 1
 
-            server.add_flags(uid, ["\\Seen"])
+            # if we processed something, stop (don’t double-run on All Mail)
+            if processed > 0:
+                break
 
-    return {"status": "processed", "count": processed}
+    return {"status": "processed", "count": processed, "checked_last_10_each_folder": checked}
 
 
 @app.get("/")
 def health():
     return {"status": "Email review bot running"}
+
 
