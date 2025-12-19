@@ -1,129 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>AI Review Reply Generator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>AI Review Reply Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial;
-      background: #f5f7fb;
-      color: #111;
-    }
-    .container {
-      max-width: 720px;
-      margin: 60px auto;
-      padding: 30px;
-      background: white;
-      border-radius: 14px;
-      box-shadow: 0 20px 40px rgba(0,0,0,.08);
-    }
-    h1 {
-      margin-top: 0;
-      font-size: 32px;
-    }
-    p {
-      color: #555;
-      line-height: 1.5;
-    }
-    textarea {
-      width: 100%;
-      height: 140px;
-      padding: 14px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 15px;
-      margin-top: 10px;
-      resize: vertical;
-    }
-    button {
-      margin-top: 15px;
-      padding: 12px 18px;
-      border-radius: 10px;
-      border: none;
-      font-size: 15px;
-      cursor: pointer;
-    }
-    .generate {
-      background: #4f46e5;
-      color: white;
-    }
-    .generate:hover {
-      background: #4338ca;
-    }
-    .reply {
-      margin-top: 20px;
-      background: #f1f1f3;
-      padding: 15px;
-      border-radius: 10px;
-      white-space: pre-wrap;
-      min-height: 60px;
-    }
-    .pricing {
-      margin-top: 30px;
-      padding: 20px;
-      background: #f9fafb;
-      border-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .price {
-      font-size: 22px;
-      font-weight: bold;
-    }
-    .stripe {
-      background: black;
-      color: white;
-      text-decoration: none;
-      padding: 12px 18px;
-      border-radius: 10px;
-    }
-    .stripe:hover {
-      background: #000;
-    }
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#f7f7f8;color:#111}
+    .page{max-width:720px;margin:60px auto;padding:0 20px}
+    .card{background:#fff;border-radius:14px;padding:32px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+    h1{margin:0 0 8px;font-size:28px;font-weight:600}
+    .subtitle{color:#555;margin-bottom:24px;line-height:1.5}
+    .price-box{background:#f1f1f3;border-radius:10px;padding:16px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .price{font-size:18px;font-weight:700}
+    .btn{border:none;border-radius:10px;padding:12px 14px;font-size:14px;cursor:pointer}
+    .btn-dark{background:#111;color:#fff;text-decoration:none;display:inline-block;text-align:center}
+    .btn-dark:hover{background:#000}
+    label{font-size:14px;font-weight:600;display:block;margin:14px 0 6px}
+    input,textarea{width:100%;padding:12px;font-size:14px;border-radius:10px;border:1px solid #ccc;font-family:inherit}
+    textarea{resize:vertical;min-height:120px}
+    .btn-primary{width:100%;margin-top:14px;background:#4f46e5;color:#fff}
+    .btn-primary:hover{background:#4338ca}
+    .output{margin-top:18px;background:#f1f1f3;padding:14px;border-radius:10px;white-space:pre-wrap;line-height:1.5;min-height:48px}
+    .small{font-size:12px;color:#666;margin-top:10px}
   </style>
 </head>
 <body>
+  <div class="page">
+    <div class="card">
+      <h1>AI Review Reply Tool</h1>
+      <div class="subtitle">Paste a customer review and get a clean reply in seconds.</div>
 
-  <div class="container">
-    <h1>AI Review Reply Generator</h1>
-    <p>Paste a customer review below and instantly generate a professional reply you can post on Google.</p>
-
-    <textarea id="review" placeholder="Paste customer review here..."></textarea>
-
-    <button class="generate" onclick="generateReply()">Generate Reply</button>
-
-    <div class="reply" id="reply"></div>
-
-    <div class="pricing">
-      <div>
+      <div class="price-box">
         <div class="price">£35 / month</div>
-        <p style="margin:0;color:#666;">Unlimited replies • Cancel anytime</p>
+        <a class="btn btn-dark" href="https://buy.stripe.com/00w28t7PK1Pn07EdEB7Zu01" target="_blank" rel="noopener">
+          Subscribe on Stripe
+        </a>
       </div>
-      <a class="stripe" href="https://buy.stripe.com/00w28t7PK1Pn07EdEB7Zu01" target="_blank">
-        Subscribe
-      </a>
+
+      <label>Email used for subscription</label>
+      <input id="email" type="email" placeholder="you@business.com" />
+
+      <label>Customer review</label>
+      <textarea id="review" placeholder="Paste the customer review here..."></textarea>
+
+      <button class="btn btn-primary" onclick="generate()">Generate Reply</button>
+
+      <div id="output" class="output"></div>
+      <div class="small">Free test email: <b>demo@test.com</b> (works anytime)</div>
     </div>
   </div>
 
-<script>
-async function generateReply() {
-  const review = document.getElementById("review").value;
-  const replyBox = document.getElementById("reply");
-  replyBox.innerText = "Generating...";
+  <script>
+    async function generate() {
+      const email = document.getElementById("email").value.trim();
+      const review = document.getElementById("review").value.trim();
+      const output = document.getElementById("output");
 
-  const res = await fetch("/generate-reply", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ review_text: review })
-  });
+      if (!email) { output.innerText = "Enter your subscription email first."; return; }
+      if (!review) { output.innerText = "Paste a review first."; return; }
 
-  const data = await res.json();
-  replyBox.innerText = data.reply_text;
-}
-</script>
+      output.innerText = "Generating...";
 
+      try {
+        const res = await fetch("/generate-reply", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email, review_text: review })
+        });
+
+        const data = await res.json();
+        output.innerText = data.reply_text || "No reply returned.";
+      } catch (e) {
+        output.innerText = "Error. Make sure the server is running.";
+      }
+    }
+  </script>
 </body>
 </html>
