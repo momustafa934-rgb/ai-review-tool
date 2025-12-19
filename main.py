@@ -11,7 +11,7 @@ app = FastAPI()
 OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY")
 
 # TEMP storage of paid emails (works fine for now)
-PAID_EMAILS = set()
+PAID_EMAILS = {"demo@test.com"}
 
 class ReviewRequest(BaseModel):
     review_text: str
@@ -47,3 +47,4 @@ def generate(req: ReviewRequest):
 
     reply = r.json()["choices"][0]["message"]["content"]
     return {"reply_text": reply}
+
