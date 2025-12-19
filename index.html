@@ -83,7 +83,7 @@
       output.innerText = "Generating reply...";
 
       try {
-        const res = await fetch("https://YOUR_RENDER_URL.onrender.com/generate-reply", {
+        const res = await fetch("/generate-reply", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -96,7 +96,7 @@
         const data = await res.json();
         output.innerText = data.reply_text;
       } catch (e) {
-        output.innerText = "Error. Make sure the server is running.";
+        output.innerText = "Error. Please try again.";
       }
     }
   </script>
