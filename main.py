@@ -1,61 +1,49 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-import os
-import requests
+import os, requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = FastAPI()
 
-# (CORS is fine to keep; not required once we use same domain, but okay)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY")
+
+# TEMP storage of paid emails (works fine for now)
+PAID_EMAILS = set()
 
 class ReviewRequest(BaseModel):
     review_text: str
-    business_name: str = "Your Business"
-    tone: str = "professional and friendly"
-
-class ReviewReply(BaseModel):
-    reply_text: str
+    email: str
 
 @app.get("/")
-def home():
-    # serves your website
+def home(request: Request):
+    email = request.query_params.get("email")
+    if email:
+        PAID_EMAILS.add(email)
     return FileResponse("index.html")
 
-def generate_reply(review_text: str, business_name: str, tone: str) -> str:
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
-        return "API key missing."
+@app.post("/generate-reply")
+def generate(req: ReviewRequest):
+    if req.email not in PAID_EMAILS:
+        return {"reply_text": "Please subscribe (£35/month) before using the generator."}
 
-    url = "https://openrouter.ai/api/v1/chat/completions"
-    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    data = {
-        "model": "meta-llama/llama-3.1-8b-instruct",
-        "messages": [
-            {"role": "system", "content": "Write short, polite replies to customer reviews. Keep it under 80 words."},
-            {"role": "user", "content": f"Business name: {business_name}\nTone: {tone}\n\nCustomer review:\n\"{review_text}\"\n\nWrite a reply as the business owner."}
-        ],
-    }
+    r = requests.post(
+        "https://openrouter.ai/api/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {OPENROUTER_KEY}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "meta-llama/llama-3.1-8b-instruct",
+            "messages": [
+                {"role": "system", "content": "Write a professional reply to a customer review."},
+                {"role": "user", "content": req.review_text}
+            ]
+        },
+        timeout=20
+    )
 
-    try:
-        r = requests.post(url, headers=headers, json=data, timeout=20)
-        r.raise_for_status()
-        reply = r.json()["choices"][0]["message"]["content"]
-        return reply.strip().strip('"')
-    except Exception:
-        return "Thank you for your feedback. We appreciate you taking the time to leave a review."
-
-@app.post("/generate-reply", response_model=ReviewReply)
-def api_generate(req: ReviewRequest):
-    reply = generate_reply(req.review_text, req.business_name, req.tone)
+    reply = r.json()["choices"][0]["message"]["content"]
     return {"reply_text": reply}
