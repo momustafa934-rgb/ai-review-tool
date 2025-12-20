@@ -8,9 +8,13 @@ app = FastAPI()
 
 OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY")
 
-# ✅ Demo email you can use anytime for testing
-# ✅ Paid emails get added automatically when Stripe redirects back with ?email=
-PAID_EMAILS = {"demo@test.com"}
+# Secret demo email (only you know). Set in Render as DEMO_EMAIL
+DEMO_EMAIL = (os.getenv("DEMO_EMAIL") or "").strip().lower()
+
+# Paid emails list (in-memory)
+PAID_EMAILS = set()
+if DEMO_EMAIL:
+    PAID_EMAILS.add(DEMO_EMAIL)
 
 class ReviewRequest(BaseModel):
     review_text: str
@@ -18,7 +22,7 @@ class ReviewRequest(BaseModel):
 
 @app.get("/")
 def serve_site(request: Request):
-    # If Stripe redirects back with ?email=their@email.com, unlock them
+    # Stripe unlock: Stripe redirects back with ?email=their@email.com
     email_param = request.query_params.get("email")
     if email_param:
         PAID_EMAILS.add(email_param.strip().lower())
@@ -52,4 +56,6 @@ def generate(req: ReviewRequest):
 
     reply = r.json()["choices"][0]["message"]["content"].strip()
     return {"reply_text": reply}
+
+
 
